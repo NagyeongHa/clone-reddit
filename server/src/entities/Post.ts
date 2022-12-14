@@ -9,9 +9,12 @@ import {
   OneToMany,
 } from "typeorm";
 import { makeId, slugify } from "../utils/helpers";
+import Comment from "./Comment";
 
 import BaseEntity from "./Entity";
 import Sub from "./Sub";
+import User from "./User";
+import Vote from "./Vote";
 @Entity("post")
 export default class Post extends BaseEntity {
   @Index()

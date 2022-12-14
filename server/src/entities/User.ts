@@ -1,16 +1,10 @@
-import { IsEmail } from "class-validator";
-import { Length } from "class-validator/types/decorator/decorators";
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  Index,
-  OneToMany,
-  BeforeInsert,
-} from "typeorm";
+import { IsEmail, Length } from "class-validator";
+import { Entity, Column, Index, OneToMany, BeforeInsert } from "typeorm";
 import bcrypt from "bcryptjs";
 import { Exclude } from "class-transformer";
 import BaseEntity from "./Entity";
+import Post from "./Post";
+import Vote from "./Vote";
 @Entity("users")
 export default class User extends BaseEntity {
   @Index()
