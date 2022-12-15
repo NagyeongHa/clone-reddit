@@ -1,6 +1,11 @@
-import { validate } from "class-validator";
+import { isEmpty, validate } from "class-validator";
 import { Request, Response, Router } from "express";
 import User from "../entities/User";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
+
+const router = Router();
 
 const mapError = (errors: Object[]) => {
   return errors.reduce((prev: any, err: any) => {
@@ -8,8 +13,6 @@ const mapError = (errors: Object[]) => {
     return prev;
   }, {});
 };
-
-const router = Router();
 
 const register = async (req: Request, res: Response) => {
   const { email, username, password } = req.body;
@@ -50,6 +53,54 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
+const login = async (req: Request, res: Response) => {
+  const { username, password } = req.body;
+
+  try {
+    let errors: any = {};
+
+    //비워져 있다면 에러를 프론트로 보내줌
+    if (isEmpty(username)) errors.username = "사용자 이름은 비워둘 수 없습니다";
+    if (isEmpty(password)) errors.password = "비밀번호는 비워둘 수 없습니다";
+    if (Object.keys(errors).length) {
+      return res.status(400).json(errors);
+    }
+
+    //디비에서 유저 찾기
+    const user = await User.findOneBy({ username });
+    if (!user)
+      return res
+        .status(404)
+        .json({ username: "사용자 이름이 등록되지 않았습니다" });
+
+    //유저가 있다면 비밀번호 비교하기
+    const passwordMatches = await bcrypt.compare(password, user.password);
+
+    //비밀번호가 다르다면 에러 보내기
+    if (!passwordMatches) {
+      return res.status(401).json({ password: "비밀번호가 잘못되었습니다" });
+    }
+
+    //비밀번호가 맞다면 토큰 생성
+    const token = jwt.sign({ username }, process.env.JWT_SECRET);
+
+    //토큰 쿠키에 저장
+    res.set(
+      "Set-Cookie",
+      cookie.serialize("token", token, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 24 * 7, //일주일
+        path: "/",
+      })
+    );
+    return res.json({ user, token });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error });
+  }
+};
+
 router.post("/register", register);
+router.post("/login", login);
 
 export default router;
