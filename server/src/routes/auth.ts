@@ -104,9 +104,24 @@ const login = async (req: Request, res: Response) => {
   }
 };
 
+const logout = (_: Request, res: Response) => {
+  res.set(
+    "Set-Cookie",
+    cookie.serialize("token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      expires: new Date(0), //쿠키를 설정해주지만 만료기간을 0으로 줘서 바로 발급과 동시에 쿠키 만료
+      path: "/",
+    })
+  );
+  res.status(200).json({ success: true });
+};
+
 const router = Router();
 router.get("/me", userMiddleware, authMiddleware, me);
 router.post("/register", register);
 router.post("/login", login);
+router.post("/logout", userMiddleware, authMiddleware, logout);
 
 export default router;
