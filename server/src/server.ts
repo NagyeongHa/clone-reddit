@@ -25,6 +25,8 @@ app.get("/", (_, res) => res.send("running"));
 app.use("/api/auth", authRoutes);
 app.use("/api/subs", subsRoutes);
 
+app.use(express.static("public"));
+
 let port = 4000;
 
 app.listen(port, async () => {
