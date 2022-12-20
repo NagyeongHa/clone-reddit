@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
+import SideBar from "../../components/SideBar";
 import { useAuthState } from "../../context/auth";
 
 const SubPage = () => {
@@ -12,19 +13,7 @@ const SubPage = () => {
   const router = useRouter();
   const subName = router.query.sub; //[sub]
 
-  const fetcher = async (url: string) => {
-    try {
-      const res = await axios.get(url);
-      return res.data;
-    } catch (error: any) {
-      throw error.response.data;
-    }
-  };
-
-  const { data: sub, error } = useSWR(
-    subName ? `/subs/${subName}` : null,
-    fetcher
-  );
+  const { data: sub, error } = useSWR(subName ? `/subs/${subName}` : null);
 
   //sub 만든 사람과 현재 로그인한 사람이 같으면 ownSub(true)
   useEffect(() => {
@@ -118,7 +107,10 @@ const SubPage = () => {
             </div>
           </div>
           {/* 포스트 사이드바 */}
-          <div className='flex max-w-5xl px-4 mx-auto'></div>
+          <div className='flex max-w-5xl px-4 mx-auto'>
+            <div className='w-full md:mr-3 md:2-8/12'></div>
+            <SideBar sub={sub} />
+          </div>
         </>
       )}
     </>
