@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { FormEvent, useState } from "react";
 import useSWR from "swr";
-import { Post } from "../../../../types";
+import { Comment, Post } from "../../../../types";
 import { FaCommentAlt } from "react-icons/fa";
 import { useAuthState } from "../../../../context/auth";
 
@@ -18,7 +18,12 @@ const PostPage = () => {
     identifier && slug ? `/posts/${identifier}/${slug}` : null
   );
 
-  const handleSubmit = async (event: FormEvent) => {
+  const { data: comments, mutate } = useSWR<Comment[]>(
+    identifier && slug ? `posts/${identifier}/${slug}/comments` : null
+  );
+  console.log(comments);
+
+  const createComment = async (event: FormEvent) => {
     event.preventDefault();
     if (newComment.trim() === "") return;
 
@@ -26,6 +31,7 @@ const PostPage = () => {
       await axios.post(`/posts/${post?.identifier}/${post?.slug}/comments`, {
         body: newComment,
       });
+      mutate();
       setNewComment("");
     } catch (error) {
       console.log(error);
@@ -79,7 +85,7 @@ const PostPage = () => {
                         </Link>{" "}
                         으로 댓글 작성
                       </p>
-                      <form onSubmit={handleSubmit}>
+                      <form onSubmit={createComment}>
                         <textarea
                           className='w-full p-3 border border-gray-300 rounded focus:outline-none focus:border-gray-600'
                           onChange={e => setNewComment(e.target.value)}
@@ -110,6 +116,27 @@ const PostPage = () => {
                     </div>
                   )}
                 </div>
+                {/* 댓글작성구간 끝 */}
+                {/* 댓글 리스트  */}
+                {comments?.map(comment => (
+                  <div className='flex' key={comment.identifier}>
+                    <div className='py-2 pr-2'>
+                      <p className='mb-1 text-xs leading-none'>
+                        <Link href={`u/${comment.username}`}>
+                          <a className='mr-1 font-bold hover:underline'>
+                            {comment.username}
+                          </a>
+                        </Link>
+                        <span className='text-gray-600'>{`${
+                          comment.voteScore
+                        } posts ${dayjs(comment.createdAt).format(
+                          "YYYY-MM-DD HH:mm"
+                        )}`}</span>
+                      </p>
+                      <p>{comment.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </>
           )}
