@@ -5,6 +5,29 @@ import Sub from "../entities/Sub";
 import Post from "../entities/Post";
 import Comment from "../entities/Comment";
 
+const getPosts = async (req: Request, res: Response) => {
+  const currentPage: number = (req.query.page || 0) as number;
+  const perPage: number = (req.query.count || 8) as number; //한 페이지에 몇 개의 포스트를 가져올지
+
+  try {
+    const posts = await Post.find({
+      order: { createdAt: "DESC" },
+      relations: ["sub", "votes", "comments"],
+      skip: currentPage * perPage, //현재페이지*8 내가 본 포스트 개수만큼 skip
+      take: perPage,
+    });
+
+    if (res.locals.user) {
+      posts.forEach(p => p.setUserVote(res.locals.user));
+    }
+
+    return res.json(posts);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "getPosts에 문제가 발생했습니다" });
+  }
+};
+
 const getPost = async (req: Request, res: Response) => {
   const { identifier, slug } = req.params;
   try {
@@ -96,6 +119,10 @@ const getPostComment = async (req: Request, res: Response) => {
 const router = Router();
 router.get("/:identifier/:slug", userMiddleware, getPost);
 router.post("/", userMiddleware, authMiddleware, createPost);
+
+router.get("/", userMiddleware, getPosts);
+
 router.post("/:identifier/:slug/comments", userMiddleware, createPostComment);
 router.get("/:identifier/:slug/comments", userMiddleware, getPostComment);
+
 export default router;

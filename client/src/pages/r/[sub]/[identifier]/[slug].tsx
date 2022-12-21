@@ -16,11 +16,13 @@ const PostPage = () => {
   const { authenticated, user } = useAuthState();
   const [newComment, setNewComment] = useState("");
 
-  const { data: post, error } = useSWR<Post>(
-    identifier && slug ? `/posts/${identifier}/${slug}` : null
-  );
+  const {
+    data: post,
+    mutate: postMutate,
+    error,
+  } = useSWR<Post>(identifier && slug ? `/posts/${identifier}/${slug}` : null);
 
-  const { data: comments, mutate } = useSWR<Comment[]>(
+  const { data: comments, mutate: commentMutate } = useSWR<Comment[]>(
     identifier && slug ? `posts/${identifier}/${slug}/comments` : null
   );
   console.log(comments);
@@ -33,7 +35,7 @@ const PostPage = () => {
       await axios.post(`/posts/${post?.identifier}/${post?.slug}/comments`, {
         body: newComment,
       });
-      mutate();
+      commentMutate();
       setNewComment("");
     } catch (error) {
       console.log(error);
@@ -58,6 +60,8 @@ const PostPage = () => {
         commentIdentifier: comment?.identifier,
         value,
       });
+      postMutate();
+      commentMutate();
     } catch (error) {
       console.log(error);
     }
@@ -71,7 +75,7 @@ const PostPage = () => {
             <>
               <div className='flex'>
                 {/* 좋아요 싫어요 기능 */}
-                <div className='flex-shrink-0 w-10 py-2 text-center rounded-l'>
+                <div className='flex-shrink-0 w-10 py-1 text-center rounded-l'>
                   <div
                     className='w-6 mx-auto text-gray-500 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500 mb-1'
                     onClick={() => vote(1)}
@@ -174,7 +178,7 @@ const PostPage = () => {
                 {comments?.map(comment => (
                   <div className='flex' key={comment.identifier}>
                     {/* 좋아요 싫어요 기능 */}
-                    <div className='flex-shrink-0 w-10 py-2 text-center rounded-l'>
+                    <div className='flex-shrink-0 w-10 py-1 text-center rounded-l'>
                       <div
                         className='w-6 mx-auto text-gray-500 rounded cursor-pointer hover:bg-gray-300 hover:text-red-500 mb-1'
                         onClick={() => vote(1, comment)}
