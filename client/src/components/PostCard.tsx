@@ -13,9 +13,10 @@ import axios from "axios";
 interface PostCardProps {
   post: Post;
   subMutate?: () => void;
+  mutate?: () => void;
 }
 
-const PostCard = ({ post, subMutate }: PostCardProps) => {
+const PostCard = ({ post, subMutate, mutate }: PostCardProps) => {
   const {
     identifier,
     slug,
@@ -43,6 +44,7 @@ const PostCard = ({ post, subMutate }: PostCardProps) => {
     try {
       await axios.post("/votes", { identifier, slug, value });
       if (subMutate) subMutate();
+      if (mutate) mutate();
     } catch (error) {
       console.log(error);
     }

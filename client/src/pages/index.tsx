@@ -8,15 +8,20 @@ import axios from "axios";
 import { useAuthState } from "../context/auth";
 import useSWRInfinite from "swr/infinite";
 import PostCard from "../components/PostCard";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [observedPost, setObservedPost] = useState("");
   const { authenticated } = useAuthState();
 
   const address = "http://localhost:4000/api/subs/sub/topSubs";
+  const { data: tobSubs } = useSWR<Sub[]>(address);
 
-  //각 페이지의 SWR 키를 받기 위한 함수
-  //fetcher 에 의해 허용된 값을 반환
   const getKey = (pageIndex: number, previousPageData: Post[]) => {
+    console.log("previousPageData", previousPageData);
+    console.log("pageIndex", pageIndex);
+    console.log("=====", previousPageData && !previousPageData.length);
+
     if (previousPageData && !previousPageData.length) return null; //끝에 도달
     return `/posts?page=${pageIndex}`; //SWR key
   };
@@ -29,12 +34,48 @@ export default function Home() {
     isValidating,
     mutate,
   } = useSWRInfinite<Post[]>(getKey);
-  console.log(data);
 
   const isInitialLoading = !data && !error;
   const posts: Post[] = data ? ([] as Post[]).concat(...data) : [];
 
-  const { data: tobSubs } = useSWR<Sub[]>(address);
+  useEffect(() => {
+    //포스트가 없다면 return
+    if (!posts || !posts.length) return;
+    //posts 배열안에 마지막 post.id를 가져옴
+    const id = posts[posts.length - 1].identifier;
+    //posts 배열에 posts가 추가돼서 마지막 posts가 바뀌었다면
+    //바뀐 post 중 마지막 post를 ovservedPost 로 변경
+
+    if (id !== observedPost) {
+      setObservedPost(id);
+      observeElement(document.getElementById(id));
+    }
+  }, [posts]);
+
+  const observeElement = (element: HTMLElement | null) => {
+    console.log(element);
+
+    if (!element) return;
+
+    //브라우저 뷰포트(ViewPort)와 설정한 요소(element)의 교차점을 관찰
+    //entries는 IntersectionObserverEntry 인스턴스의 배열
+    //isIntersecting : 관찰 대상의 교차 상태( Boolean )
+    const observer = new IntersectionObserver(
+      entries => {
+        console.log("entries", entries);
+
+        if (entries[0].isIntersecting) {
+          console.log("마지막 포스트에 왔습니다");
+          setPage(page + 1);
+          observer.unobserve(element);
+        }
+      },
+      { threshold: 1 }
+    );
+    //대상 요소의 관찰을 시작
+    observer.observe(element);
+  };
+  console.log("data", data, "page", page);
 
   return (
     <div className='flex max-w-5xl px-4 mx-auto'>
@@ -44,7 +85,7 @@ export default function Home() {
           <p className='text-lg text-center'>로딩중입니다...</p>
         )}
         {posts?.map(post => (
-          <PostCard key={post.identifier} post={post} />
+          <PostCard key={post.identifier} post={post} mutate={mutate} />
         ))}
       </div>
 
