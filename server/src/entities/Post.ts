@@ -1,4 +1,5 @@
 import { Exclude, Expose } from "class-transformer";
+import { slugify } from "transliteration";
 import {
   BeforeInsert,
   Column,
@@ -8,7 +9,7 @@ import {
   ManyToOne,
   OneToMany,
 } from "typeorm";
-import { makeId, slugify } from "../utils/helpers";
+import { makeId } from "../utils/helpers";
 import Comment from "./Comment";
 
 import BaseEntity from "./Entity";

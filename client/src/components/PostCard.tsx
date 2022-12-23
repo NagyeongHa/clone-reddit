@@ -86,17 +86,17 @@ const PostCard = ({ post, subMutate, mutate }: PostCardProps) => {
         <div className='flex items-center'>
           {!isInSubPage && (
             <div className='flex items-center'>
-              {/* <Link href={`/r/${subName}`}>
-            <a>
-            <Image
-            src={sub!.imageUrl}
-            alt='sub'
-            className='rounded-full cursor-pointer'
-            width={12}
-            height={12}
-            />
-            </a>
-        </Link> */}
+              <Link href={`/r/${subName}`}>
+                <a>
+                  <Image
+                    src={sub!.imageUrl}
+                    alt='sub'
+                    className='rounded-full cursor-pointer'
+                    width={12}
+                    height={12}
+                  />
+                </a>
+              </Link>
               <Link href={`/r/${subName}`}>
                 <a className='ml-2 text-xs font-bold cursor-pointer hover:underline'>
                   /r/{subName}
@@ -125,7 +125,7 @@ const PostCard = ({ post, subMutate, mutate }: PostCardProps) => {
         <div className='flex'>
           <Link href={url}>
             <a>
-              <FaCommentAlt className='inline-block' />
+              <FaCommentAlt className='inline-block' size='0.9rem' />
               <span> {commentCount}</span>
             </a>
           </Link>

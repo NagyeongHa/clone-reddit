@@ -18,10 +18,6 @@ export default function Home() {
   const { data: tobSubs } = useSWR<Sub[]>(address);
 
   const getKey = (pageIndex: number, previousPageData: Post[]) => {
-    console.log("previousPageData", previousPageData);
-    console.log("pageIndex", pageIndex);
-    console.log("=====", previousPageData && !previousPageData.length);
-
     if (previousPageData && !previousPageData.length) return null; //끝에 도달
     return `/posts?page=${pageIndex}`; //SWR key
   };
@@ -53,8 +49,6 @@ export default function Home() {
   }, [posts]);
 
   const observeElement = (element: HTMLElement | null) => {
-    console.log(element);
-
     if (!element) return;
 
     //브라우저 뷰포트(ViewPort)와 설정한 요소(element)의 교차점을 관찰
@@ -62,8 +56,6 @@ export default function Home() {
     //isIntersecting : 관찰 대상의 교차 상태( Boolean )
     const observer = new IntersectionObserver(
       entries => {
-        console.log("entries", entries);
-
         if (entries[0].isIntersecting) {
           console.log("마지막 포스트에 왔습니다");
           setPage(page + 1);
@@ -75,7 +67,6 @@ export default function Home() {
     //대상 요소의 관찰을 시작
     observer.observe(element);
   };
-  console.log("data", data, "page", page);
 
   return (
     <div className='flex max-w-5xl px-4 mx-auto'>

@@ -5,6 +5,7 @@ import authRoutes from "./routes/auth";
 import subsRoutes from "./routes/subs";
 import postsRoutes from "./routes/posts";
 import votesRoutes from "./routes/votes";
+import usersRoutes from "./routes/users";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -28,6 +29,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/subs", subsRoutes);
 app.use("/api/posts", postsRoutes);
 app.use("/api/votes", votesRoutes);
+app.use("/api/users", usersRoutes);
 
 app.use(express.static("public"));
 
